@@ -1,0 +1,23 @@
+{
+  "name": "Pine Script Dev Container",
+  "dockerComposeFile": "compose.yaml",
+  "service": "devcontainer",
+  "workspaceFolder": "/workspace",
+  "postCreateCommand": "/usr/local/container-setup/devcon-setup",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-azuretools.vscode-containers",
+        "ms-azuretools.vscode-docker",
+        "eamodio.gitlens",
+        "esbenp.prettier-vscode",
+        "mechatroner.rainbow-csv",
+        "github.copilot-chat",
+        "ZooCodeOrganization.zoo-code",
+        "ex-codes.pine-script-syntax-highlighter"
+      ]
+    }
+  },
+  "remoteUser": "devuser",
+  "shutdownAction": "stopCompose"
+}

@@ -1,0 +1,13 @@
+#! /bin/sh
+
+if [[ ! -e ~/.devcon-setup-done ]]; then
+    echo "Setting up dev container ..."
+
+    # Put any setup commands here that should only run once per dev container
+
+    # Mark the setup as done
+    touch ~/.devcon-setup-done
+    echo "Dev container setup complete."
+else 
+    echo "Dev container setup already done."
+fi

@@ -1,0 +1,21 @@
+version: '3.8'
+services:
+  devcontainer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    hostname: devcontainer-pine-script
+    container_name: devcontainer-pine-script
+    userns_mode: "keep-id"
+    volumes:
+      - ..:/workspace
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - ${SSH_AUTH_SOCK}:${SSH_AUTH_SOCK}
+    environment:
+      - DISPLAY=${DISPLAY}
+      - SSH_AUTH_SOCK=${SSH_AUTH_SOCK}
+    working_dir: /workspace
+    user: devuser
+    tty: true
+    stdin_open: true
+    network_mode: host
