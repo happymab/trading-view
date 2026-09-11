@@ -13,9 +13,17 @@
 // ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 // OTHER DEALINGS IN THE SOFTWARE.
 
+///////////////////////////////////////////////////////////////////////////////
+// (mab) Trend
+//
+// This indicator is a trend detection tool that uses a combination of moving 
+// averages and supertrend to determine the current market trend.
+//
+// Version: 2.0
+///////////////////////////////////////////////////////////////////////////////
 
 
-//@version=5
+//@version=6
 indicator('(mab) Trend', shorttitle='(mab)Trend', overlay=true)
 
 // (mab) Colors
