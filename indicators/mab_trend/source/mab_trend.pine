@@ -23,135 +23,102 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 
-//@version=6
-indicator('(mab) Trend', shorttitle='(mab)Trend', overlay=true)
+//@version=5
+indicator('(mab) Trend', shorttitle = '(mab)Trend', overlay = true)
 
 // (mab) Colors
 col_none = color.new(color.white, 100)
 
-col_darkSpringGreen 			= #137547
-col_lightGreen 					= #8fe388
-col_rubyRed 					= #931621
-col_redPigment 					= #ef1010
-col_outrageousOrange 			= #fc7753
-col_mysticMaroon 				= #bc387d
-col_darkBluePurple 				= #311b92
-col_trurfsBlue 					= #0091eb
-col_honoluluBlue 				= #176da3
-col_GreenBlueCrayola 			= #1e91d6
-col_vividSkyBlue 				= #42cafd
-col_maximumYellowRed 			= #fec149
-col_navajo_white 				= #FEDB9B
-col_seeshell 					= #fef4ec
+col_darkSpringGreen = #137547
+col_lightGreen = #8fe388
+col_rubyRed = #931621
+col_redPigment = #ef1010
+col_outrageousOrange = #fc7753
+col_mysticMaroon = #bc387d
+col_darkBluePurple = #311b92
+col_trurfsBlue = #0091eb
+col_honoluluBlue = #176da3
+col_GreenBlueCrayola = #1e91d6
+col_vividSkyBlue = #42cafd
+col_maximumYellowRed = #fec149
+col_navajo_white = #FEDB9B
+col_seeshell = #fef4ec
 
-col_blue1 						= #CFEAF1
-col_blue2 						= #BBD2E7
-col_blue3 						= #A6BADC
-col_blue4 						= #92A2D2
-col_blue5 						= #7D8AC7
-col_blue6 						= #6972BD
-col_blue7 						= #545AB2
-col_blue8 						= #4042A8
-col_blue9 						= #2B2A9D
+col_blue1 = #CFEAF1
+col_blue2 = #BBD2E7
+col_blue3 = #A6BADC
+col_blue4 = #92A2D2
+col_blue5 = #7D8AC7
+col_blue6 = #6972BD
+col_blue7 = #545AB2
+col_blue8 = #4042A8
+col_blue9 = #2B2A9D
 
 
 //////////////////////////////////
 // General settings and enable/disable indicators
 //////////////////////////////////
-source 							= input.source(close, title='Input', group='General')
-trendMode						= input.string('MA', title='Trend detection mode', options=['MA', 'Supertrend', 'Supertrend and MA', 'ADX & DI'], group='General')	
-showMa 							= input.bool(true, title='Show SMA', group='General')
-showSuperTrend 					= input.bool(false, title='Show Super Trend indicator', group='General')
+source = input.source(close, title = 'Input', group = 'General')
+trendMode = input.string('MA Crossover', title = 'Trend detection mode', 
+  options = [ 'MA Crossover', 'MA Slope', 'MA Crossover and Slope', 'Supertrend', 'Supertrend on MA' ], 
+  group = 'General')
+showMa = input.bool(true, title = 'Show MA', group = 'General')
+showSuperTrend = input.bool(false, title = 'Show Super Trend indicator', 
+  group = 'General')
 
 
 //////////////////////////////////
 // MA
 //////////////////////////////////
-ma1Length						= input.int(13, title='MA length', minval=1, group = 'MA')
-ma1Mode							= input.string('EMA', title='SMA / EMA', options=['SMA', 'EMA'], group = 'MA')
-ma2Length						= input.int(30, title='SMA length', minval=1, group = 'MA')
-ma2Mode							= input.string('SMA', title='SMA / EMA', options=['SMA', 'EMA'], group = 'MA')
+ma1Length = input.int(13, title = 'Fast MA length', minval = 1, group = 'MA')
+ma1Mode = input.string('EMA', title = 'SMA / EMA', options = ['SMA', 'EMA'], group = 'MA')
+ma2Length = input.int(30, title = 'Slow MA length', minval = 1, group = 'MA')
+ma2Mode = input.string('SMA', title = 'SMA / EMA', options = ['SMA', 'EMA'], group = 'MA')
 
 
-// Calculate SMA 
+// Calculate MA 
 ma1 = ma1Mode == 'SMA' ? ta.sma(source, ma1Length) : ta.ema(source, ma1Length)
-ma2 = ma2Mode =='SMA' ? ta.sma(source, ma2Length) : ta.ema(source, ma2Length)
+ma2 = ma2Mode == 'SMA' ? ta.sma(source, ma2Length) : ta.ema(source, ma2Length)
 isMaBullish = ma1 > ma2
-isMa2Ascending = ma2 > ma2[1]
+isMa1Ascending = (ma1 > ma1[1])
+isMa2Ascending = (ma2 > ma2[1])
+isMa2Below = ma2 < source
 
 // Plot EMA's and SMA's
-plot(showMa ? ma1 : na, title='MA 1', color=color.new(col_rubyRed, 0), style=plot.style_line, linewidth=1)
-plot(showMa ? ma2 : na, title='MA 2', color=color.new(col_darkSpringGreen, 0), style=plot.style_line, linewidth=1)
-
+plot(showMa ? ma1 : na, title = 'Fast MA', color = color.new(col_rubyRed, 0), style = plot.style_line, linewidth = 1)
+plot(showMa ? ma2 : na, title = 'Slow MA', color = color.new(col_darkSpringGreen, 0), style = plot.style_line, linewidth = 1)
 
 
 //////////////////////////////////
 // Supertrend
 //////////////////////////////////
-stFastAtrPeriod 					= input.int(10, title='Fast ATR period', minval=1, group='Supertrend')
-stFastAtrMultiplier 				= input.float(3.0, title='Fast ATR multiplier', minval=0.1, group='Supertrend')
-stSlowAtrPeriod 					= input.int(30, title='Slow ATR period', minval=1, group='Supertrend')
-stSlowAtrMultiplier 				= input.float(9.0, title='Slow ATR multiplier', minval=0.1, group='Supertrend')
+stAtrPeriod = input.int(10, title = 'ATR period', minval = 1, group = 'Supertrend')
+stAtrMultiplier = input.float(3.0, title = 'ATR multiplier', minval = 0.1, group = 'Supertrend')
+
+stSource1 = trendMode == 'Supertrend on MA' ? ma2 : hl2
+stSource2 = trendMode == 'Supertrend on MA' ? ma2 : close
 
 // Calculate fast Supertrend
-stFastUp = hl2 - stFastAtrMultiplier * ta.atr(stFastAtrPeriod)
-stFastUp1 = nz(stFastUp[1], stFastUp)
-stFastUp := close[1] > stFastUp1 ? math.max(stFastUp, stFastUp1) : stFastUp
+stUp = stSource1 - stAtrMultiplier * ta.atr(stAtrPeriod)
+stUp1 = nz(stUp[1], stUp)
+stUp := stSource2[1] > stUp1 ? math.max(stUp, stUp1) : stUp
 
-stFastDown = hl2 + stFastAtrMultiplier * ta.atr(stFastAtrPeriod)
-stFastDown1 = nz(stFastDown[1], stFastDown)
-stFastDown := close[1] < stFastDown1 ? math.min(stFastDown, stFastDown1) : stFastDown
+stDown = stSource1 + stAtrMultiplier * ta.atr(stAtrPeriod)
+stDown1 = nz(stDown[1], stDown)
+stDown := stSource2[1] < stDown1 ? math.min(stDown, stDown1) : stDown
 
-isStFastBullish = true
-isStFastBullish := nz(isStFastBullish[1], isStFastBullish)
-isStFastBullish := not isStFastBullish and close > stFastDown1 ? true : isStFastBullish and close < stFastUp1 ? false : isStFastBullish
-
-// Calculate slow Supertrend
-stSlowUp = hl2 - stSlowAtrMultiplier * ta.atr(stSlowAtrPeriod)
-stSlowUp1 = nz(stSlowUp[1], stSlowUp)
-stSlowUp := close[1] > stSlowUp1 ? math.max(stSlowUp, stSlowUp1) : stSlowUp
-
-stSlowDown = hl2 + stSlowAtrMultiplier * ta.atr(stSlowAtrPeriod)
-stSlowDown1 = nz(stSlowDown[1], stSlowDown)
-stSlowDown := close[1] < stSlowDown1 ? math.min(stSlowDown, stSlowDown1) : stSlowDown
-
-isStSlowBullish = true
-isStSlowBullish := nz(isStSlowBullish[1], isStSlowBullish)
-isStSlowBullish := not isStSlowBullish and close > stSlowDown1 ? true : isStSlowBullish and close < stSlowUp1 ? false : isStSlowBullish
-
+isstBullish = true
+isstBullish := nz(isstBullish[1], isstBullish)
+isstBullish := not isstBullish and stSource2 > stDown1 ? true : isstBullish and stSource2 < stUp1 ? false : isstBullish
 
 // Plot Supertrend
-stFastBullPlot = plot(showSuperTrend and isStFastBullish ? stFastUp : na, title='Fast ST up trend', style=plot.style_linebr, linewidth=1, color=color.new(col_lightGreen, 0))
-stFastBearPlot = plot(showSuperTrend and not isStFastBullish ? stFastDown : na, title='Fast ST down trend', style=plot.style_linebr, linewidth=1, color=col_outrageousOrange)
-stSlowBullPlot = plot(showSuperTrend and isStSlowBullish ? stSlowUp : na, title='Slow ST up trend', style=plot.style_linebr, linewidth=1, color=color.new(col_lightGreen, 0))
-stSlowBearPlot = plot(showSuperTrend and not isStSlowBullish ? stSlowDown : na, title='Slow ST down trend', style=plot.style_linebr, linewidth=1, color=col_outrageousOrange)
-
+plot(showSuperTrend and isstBullish ? stUp : na, title = 'Fast ST up trend', style = plot.style_linebr, linewidth = 1, color = color.new(col_lightGreen, 0))
+plot(showSuperTrend and not isstBullish ? stDown : na, title = 'Fast ST down trend', style = plot.style_linebr, linewidth = 1, color = col_outrageousOrange)
 
 
 //////////////////////////////////
 // ADX, DI
 //////////////////////////////////
-adxDiLength = input(14)
-adxThreshold = input(20)
-
-tR = math.max(math.max(high-low, math.abs(high-nz(close[1]))), math.abs(low-nz(close[1])))
-dMPlus = high-nz(high[1]) > nz(low[1])-low ? math.max(high-nz(high[1]), 0): 0
-dMMinus = nz(low[1])-low > high-nz(high[1]) ? math.max(nz(low[1])-low, 0): 0
-
-smoothTR = 0.0
-smoothTR := nz(smoothTR[1]) - (nz(smoothTR[1])/adxDiLength) + tR
-
-smoothDMPlus = 0.0
-smoothDMPlus := nz(smoothDMPlus[1]) - (nz(smoothDMPlus[1])/adxDiLength) + dMPlus
-
-smoothDMMinus = 0.0
-smoothDMMinus := nz(smoothDMMinus[1]) - (nz(smoothDMMinus[1])/adxDiLength) + dMMinus
-
-DIPlus = smoothDMPlus / smoothTR * 100
-DIMinus = smoothDMMinus / smoothTR * 100
-DX = math.abs(DIPlus-DIMinus) / (DIPlus+DIMinus)*100
-ADX = ta.sma(DX, adxDiLength)
-
 
 
 //////////////////////////////////
@@ -160,22 +127,22 @@ ADX = ta.sma(DX, adxDiLength)
 isBullTrend = false
 isBearTrend = false
 
-if trendMode == 'MA'
-    isBullTrend := isMaBullish and isMa2Ascending
-	isBearTrend := not isMaBullish and not isMa2Ascending
+if trendMode == 'MA Crossover'
+    isBullTrend := isMaBullish
+    isBearTrend := not isMaBullish
+else if trendMode == 'MA Slope'
+    isBullTrend := (isMa2Ascending and isMa2Below) or (isBullTrend[1] and (isMa2Ascending or isMa2Below))
+    isBearTrend := (not isMa2Ascending and not isMa2Below) or (isBearTrend[1] and (not isMa2Ascending or not isMa2Below))
+else if trendMode == 'MA Crossover and Slope'
+    isBullTrend := (isMaBullish and isMa1Ascending and isMa2Ascending) or (isBullTrend[1] and (isMaBullish or isMa1Ascending or isMa2Ascending))
+    isBearTrend := (not isMaBullish and not isMa1Ascending and not isMa2Ascending) or (isBearTrend[1] and (not isMaBullish or not isMa1Ascending or not isMa2Ascending))
 else if trendMode == 'Supertrend'
-    isBullTrend := isStFastBullish and isStSlowBullish
-	isBearTrend := not isStFastBullish and not isStSlowBullish
-else if trendMode == 'Supertrend and MA'
-    isBullTrend := isMaBullish and isMa2Ascending and isStFastBullish
-    isBearTrend := not isMaBullish and not isMa2Ascending and not isStFastBullish
-else if trendMode == 'ADX & DI'
-    isBullTrend := DIPlus > DIMinus and ADX > adxThreshold
-	isBearTrend := DIMinus > DIPlus and ADX > adxThreshold
+    isBullTrend := isstBullish
+    isBearTrend := not isstBullish
+else if trendMode == 'Supertrend on MA'
+    isBullTrend := isstBullish
+    isBearTrend := not isstBullish
 
 // Plot background trend color
 bgcolor(isBullTrend ? color.new(col_darkSpringGreen, 80) : na)
 bgcolor(isBearTrend ? color.new(col_rubyRed, 80) : na)
-
-
-
